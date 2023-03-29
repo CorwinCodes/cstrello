@@ -3,6 +3,7 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 import mongoose from "mongoose";
 import bodyParser from "body-parser";
+import cors from 'cors';
 
 import * as usersController from './controllers/users'
 import authMiddleware from "./middlewares/auth";
@@ -15,7 +16,8 @@ const io = new Server(httpServer);
 const port = 4001;
 const connectionString = `mongodb+srv://${mongoUser}:${mongoPass}@cluster0.mkp2adm.mongodb.net/?retryWrites=true&w=majority`
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended:true}))
+app.use(bodyParser.urlencoded({extended:true}));
+app.use(cors());
 //test app
 app.get('/', (req, res) => {
     res.send('API is UP')
