@@ -5,7 +5,8 @@ import mongoose from "mongoose";
 import bodyParser from "body-parser";
 import cors from 'cors';
 
-import * as usersController from './controllers/users'
+import * as usersController from "./controllers/users";
+import * as boardsController from "./controllers/boards";
 import authMiddleware from "./middlewares/auth";
 import { mongoPass } from "./creds/mongoPass";
 import { mongoUser } from "./creds/mongoUser";
@@ -20,12 +21,20 @@ app.use(bodyParser.urlencoded({extended:true}));
 app.use(cors());
 //test app
 app.get('/', (req, res) => {
-    res.send('API is UP')
+    res.send('API is UP');
 });
 
 app.post('/api/users', usersController.register);
 app.post('/api/users/login', usersController.login);
-app.get('/api/user', authMiddleware, usersController.currentUser )
+app.get('/api/user', authMiddleware, usersController.currentUser);
+app.get('/api/boards', authMiddleware, boardsController.getBoards);
+
+mongoose.set("toJSON", { //make notes on removing the underscore from returned id
+    virtuals: true, //we can create virtual properties in mongoose and they aren't returned by default, but this changes it
+    transform: (_, converted) => {
+        delete converted._id;
+    },
+})
 
 io.on('connection', () => {
     console.log("connect");
