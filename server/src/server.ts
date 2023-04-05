@@ -28,6 +28,7 @@ app.post('/api/users', usersController.register);
 app.post('/api/users/login', usersController.login);
 app.get('/api/user', authMiddleware, usersController.currentUser);
 app.get('/api/boards', authMiddleware, boardsController.getBoards);
+app.post('/api/boards', authMiddleware, boardsController.createBoard);
 
 mongoose.set("toJSON", { //make notes on removing the underscore from returned id
     virtuals: true, //we can create virtual properties in mongoose and they aren't returned by default, but this changes it
