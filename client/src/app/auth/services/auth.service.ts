@@ -26,6 +26,11 @@ export class AuthService {
         return this.http.post<CurrentUserInterface>(url, loginRequest);
     }
 
+    logout(): void {
+        localStorage.removeItem('token');
+        this.currentUser$.next(null);
+    }
+
     setToken(currentUser: CurrentUserInterface):void { //now this exists use it in submit on register component
         localStorage.setItem('token', currentUser.token)
     }

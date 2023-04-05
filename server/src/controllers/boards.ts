@@ -33,6 +33,7 @@ export const createBoard = async (
             userId: req.user.id, //remember this is from middleware
         });
         const savedBoard = await newBoard.save();
+        res.send(savedBoard);
     } catch (err) {
         next(err);
     }
