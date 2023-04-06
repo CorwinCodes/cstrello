@@ -2,6 +2,7 @@ import { HttpErrorResponse } from "@angular/common/http";
 import { Component } from "@angular/core";
 import { FormBuilder, Validators } from "@angular/forms";
 import { Router } from "@angular/router";
+import { SocketService } from "src/app/shared/services/socket.service";
 import { AuthService } from "../../services/auth.service";
 import { RegisterRequestInterface } from "../../types/registerRequest.interface";
 
@@ -17,7 +18,12 @@ export class RegisterComponent {
         password: ['', Validators.required],
     });
 
-    constructor(private fb: FormBuilder, private authService: AuthService, private router:Router){} //inject auth service to register
+    constructor(
+        private fb: FormBuilder,
+        private authService: AuthService,
+        private router:Router,
+        private socketService: SocketService,
+    ){} //inject auth service to register
 
     onSubmit():void { //note that register returns an observable so we subscribe
         
@@ -25,6 +31,7 @@ export class RegisterComponent {
             next: (currentUser) => {
                 console.log('currentUser', currentUser) //see this in the console so we can use it to store token and set user for client
                 this.authService.setToken(currentUser);
+                this.socketService.setupSocketConnection(currentUser); //wasn't being established without an already stored token, this solves that
                 this.authService.setCurrentUser(currentUser);
                 this.errorMessage = null;
                 this.router.navigate(['/'])

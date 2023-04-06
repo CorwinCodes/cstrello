@@ -12,6 +12,11 @@ export class BoardsService {
         return this.http.get<BoardInterface[]>(url);
     }
 
+    getBoard(boardId: string): Observable<BoardInterface> {
+        const url = `${environment.apiUrl}/boards/${boardId}`;
+        return this.http.get<BoardInterface>(url);
+    }
+
     createBoard(title: string): Observable<BoardInterface> {
         const url = environment.apiUrl + '/boards';
         console.log('createBoard title:', title)

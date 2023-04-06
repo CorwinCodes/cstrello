@@ -2,6 +2,7 @@ import { HttpErrorResponse } from "@angular/common/http";
 import { Component } from "@angular/core";
 import { FormBuilder, Validators } from "@angular/forms";
 import { Router } from "@angular/router";
+import { SocketService } from "src/app/shared/services/socket.service";
 import { AuthService } from "../../services/auth.service";
 import { LoginRequestInterface } from "../../types/loginRequestInterface";
 
@@ -15,7 +16,12 @@ export class LoginComponent {
         email: ['', Validators.required],
         password: ['', Validators.required],
     });
-    constructor(private fb: FormBuilder, private authService: AuthService, private router:Router){}
+    constructor(
+        private fb: FormBuilder,
+        private authService: AuthService,
+        private router:Router,
+        private socketService: SocketService,
+    ){}
 
     onSubmit():void {
         this.authService.login(this.form.value as LoginRequestInterface).subscribe({
@@ -23,6 +29,7 @@ export class LoginComponent {
                 console.log('currentUser', currentUser)
                 this.authService.setToken(currentUser);
                 this.authService.setCurrentUser(currentUser);
+                this.socketService.setupSocketConnection(currentUser); //wasn't being established without an already stored token, this solves that
                 this.errorMessage = null;
                 this.router.navigate(['/'])
             },
