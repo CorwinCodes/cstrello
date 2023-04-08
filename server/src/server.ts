@@ -1,9 +1,11 @@
 import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
+import { Socket } from "./types/socket.interface";
 import mongoose from "mongoose";
 import bodyParser from "body-parser";
 import cors from 'cors';
+import jwt from 'jsonwebtoken';
 
 import * as usersController from "./controllers/users";
 import * as boardsController from "./controllers/boards";
@@ -11,6 +13,8 @@ import authMiddleware from "./middlewares/auth";
 import { mongoPass } from "./creds/mongoPass";
 import { mongoUser } from "./creds/mongoUser";
 import { SocketEventsEnum } from "./types/socketEvents.enum";
+import { secret } from "./creds/jwtSecret";
+import userModel from "./models/user";
 
 const app = express();
 const httpServer = createServer(app);
@@ -43,7 +47,25 @@ mongoose.set("toJSON", { //make notes on removing the underscore from returned i
     },
 })
 
-io.on('connection', (socket) => {
+io.use(
+    async (socket: Socket, next ) => {
+        try {
+            const token = (socket.handshake.auth.token as string) ?? "";
+            const data = jwt.verify(token.split(' ')[1], secret) as {
+                id: string;
+                email: string;
+            };
+            const user = await userModel.findById(data.id);
+            if (!user) {
+                return next(new Error("Authentication error"));
+            }
+            socket.user = user; //sockets can hold data in custom properties like this if we extend them
+            next();
+        } catch (error) {
+            next(new Error("Authentication error"));
+        }
+    }
+).on('connection', (socket) => {
     socket.on(SocketEventsEnum.boardsJoin, (data) => {
        boardsController.joinBoard(io, socket, data); //note that sockets can still be handled in the relevent controller by passing it whatever is needed (io included) for MVC style 
     });

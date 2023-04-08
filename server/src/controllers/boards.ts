@@ -2,7 +2,8 @@ import { Response, NextFunction } from "express";
 import BoardModel from "../models/board";
 import { Board } from "../types/board.interface";
 import { ExpressRequestInterface } from "../types/expressRequest.interface";
-import { Server, Socket } from "socket.io";
+import { Server } from "socket.io";
+import { Socket } from "../types/socket.interface";
 
 export const getBoards = async (
     req: ExpressRequestInterface,
@@ -57,7 +58,8 @@ export const getBoard = async (
 }
 
 export const joinBoard = (io: Server, socket: Socket, data: {boardId: string}) => { //double check the Server for io is from socket.io
-    console.log('server socket io join', data.boardId);
+    console.log('server socket io join board', data.boardId);
+    console.log('socket user:', socket.user);
     socket.join(data.boardId);
 }
 
