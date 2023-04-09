@@ -1,6 +1,5 @@
 import { Response, NextFunction } from "express";
 import BoardModel from "../models/board";
-import { Board } from "../types/board.interface";
 import { ExpressRequestInterface } from "../types/expressRequest.interface";
 import { Server } from "socket.io";
 import { Socket } from "../types/socket.interface";

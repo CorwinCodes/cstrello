@@ -9,6 +9,7 @@ import jwt from 'jsonwebtoken';
 
 import * as usersController from "./controllers/users";
 import * as boardsController from "./controllers/boards";
+import * as columnsController from "./controllers/columns";
 import authMiddleware from "./middlewares/auth";
 import { mongoPass } from "./creds/mongoPass";
 import { mongoUser } from "./creds/mongoUser";
@@ -39,6 +40,7 @@ app.get('/api/user', authMiddleware, usersController.currentUser);
 app.get('/api/boards', authMiddleware, boardsController.getBoards);
 app.post('/api/boards', authMiddleware, boardsController.createBoard);
 app.get('/api/boards/:boardId', authMiddleware, boardsController.getBoard);
+app.get('/api/boards/:boardId/columns', authMiddleware, columnsController.getColumns);
 
 mongoose.set("toJSON", { //make notes on removing the underscore from returned id
     virtuals: true, //we can create virtual properties in mongoose and they aren't returned by default, but this changes it
@@ -71,8 +73,12 @@ io.use(
     });
 
     socket.on(SocketEventsEnum.boardsLeave, (data) => {
-        boardsController.leaveBoard(io, socket, data); //note that sockets can still be handled in the relevent controller by passing it whatever is needed (io included) for MVC style 
-     });
+        boardsController.leaveBoard(io, socket, data);
+    });
+
+    socket.on(SocketEventsEnum.columnsCreateStart, (data) => {
+        columnsController.createColumn(io, socket, data); 
+    });
 });
 //put server inside mongoose connect to prevent trying to do anything wihtout db connection
 mongoose.connect(connectionString).then(() => {

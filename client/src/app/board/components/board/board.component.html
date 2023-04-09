@@ -1,2 +1,13 @@
-Board
-{{board$ | async | json}} <!-- don't forget to pipe it to json also -->
+<top-bar></top-bar>
+
+<div class="board" *ngIf="data$ | async as data">
+    <div class="board-header-container">
+        INLINE FORM BOARD
+    </div>
+    <div class="columns">
+        <div class="column" *ngFor="let column of data.columns">
+            <div class="column-title">{{column.title}}</div>
+        </div>
+        INLINE FORM TO CREATE COLUMN
+    </div>
+</div>
