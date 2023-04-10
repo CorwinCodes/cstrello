@@ -10,6 +10,7 @@ import jwt from 'jsonwebtoken';
 import * as usersController from "./controllers/users";
 import * as boardsController from "./controllers/boards";
 import * as columnsController from "./controllers/columns";
+import * as tasksController from "./controllers/tasks";
 import authMiddleware from "./middlewares/auth";
 import { mongoPass } from "./creds/mongoPass";
 import { mongoUser } from "./creds/mongoUser";
@@ -41,6 +42,7 @@ app.get('/api/boards', authMiddleware, boardsController.getBoards);
 app.post('/api/boards', authMiddleware, boardsController.createBoard);
 app.get('/api/boards/:boardId', authMiddleware, boardsController.getBoard);
 app.get('/api/boards/:boardId/columns', authMiddleware, columnsController.getColumns);
+app.get('/api/boards/:boardId/tasks', authMiddleware, tasksController.getTasks);
 
 mongoose.set("toJSON", { //make notes on removing the underscore from returned id
     virtuals: true, //we can create virtual properties in mongoose and they aren't returned by default, but this changes it
@@ -78,6 +80,10 @@ io.use(
 
     socket.on(SocketEventsEnum.columnsCreateStart, (data) => {
         columnsController.createColumn(io, socket, data); 
+    });
+
+    socket.on(SocketEventsEnum.tasksCreateStart, (data) => {
+        tasksController.createTask(io, socket, data); 
     });
 });
 //put server inside mongoose connect to prevent trying to do anything wihtout db connection

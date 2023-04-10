@@ -10,6 +10,8 @@ const boardSchema = new Schema<BoardDocument>({
         type: Schema.Types.ObjectId,
         required: true,
     },
-});
+},
+{timestamps: true}
+);
 
 export default model<BoardDocument>("Board", boardSchema);
