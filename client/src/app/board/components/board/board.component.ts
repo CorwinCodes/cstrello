@@ -8,6 +8,7 @@ import { BoardInterface } from 'src/app/shared/types/board.interface';
 import { ColumnInterface } from 'src/app/shared/types/column.interface';
 import { SocketEventsEnum } from 'src/app/shared/types/socketEvents.enum';
 import { BoardService } from '../../services/board.service';
+import { ColumnInputInterface } from 'src/app/shared/types/columnInput.interface';
 
 @Component({
     selector: 'board',
@@ -37,10 +38,10 @@ export class BoardComponent implements OnInit, OnDestroy {
         this.data$ = combineLatest([
             this.boardService.board$.pipe(filter(Boolean)), //standard way to ensure the stream is filtered of initial null values before informing the observable here
             this.boardService.columns$,
-        ]).pipe(map(([board, columns]) => ({
+        ]).pipe(map(([board, columns]) => ({ //destructuring from the combined streams here, order is important
             board,
             columns,
-        }))
+        })) //now we have mapped the data as an object for the cleaner data$ stream
         );
     }
 
@@ -53,13 +54,20 @@ export class BoardComponent implements OnInit, OnDestroy {
     }
     
     initializeListeners(): void {
-        const initializeListenersSub = this.router.events.subscribe(event => { //added a return for subscription instead of void so we can manage all of them with ng destroy on subscriptions
+        const initializeListenersNavSub = this.router.events.subscribe(event => { //added a return for subscription instead of void so we can manage all of them with ng destroy on subscriptions
             if (event instanceof NavigationStart) {
                 console.log('leaving page');
                 this.boardService.leaveBoard(this.boardId);
             }
         });
-        this.subscriptions.add(initializeListenersSub);
+        this.subscriptions.add(initializeListenersNavSub);
+
+        const initializeListenersCreateColumnSuccessSub = this.socketService
+        .listen<ColumnInterface>(SocketEventsEnum.columnsCreateSuccess)
+        .subscribe(column => {
+            this.boardService.addColumn(column);
+        });
+        this.subscriptions.add(initializeListenersCreateColumnSuccessSub);
     }
 
     fetchData(): void { //this logic could go in OnInit, but this is cleaner
@@ -72,6 +80,14 @@ export class BoardComponent implements OnInit, OnDestroy {
             this.boardService.setColumns(columns); //colums belong to a specific board, so they're save on the board service with other data
         });
         this.subscriptions.add(getColumnsSub);
+    }
+
+    createColumn(title: string): void {
+        const columnInput: ColumnInputInterface = {
+            title,
+            boardId: this.boardId,
+        };
+        this.columnsService.createColumn(columnInput);
     }
 
     ngOnDestroy(): void {

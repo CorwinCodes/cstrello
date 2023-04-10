@@ -3,6 +3,7 @@ import { CurrentUserInterface } from 'src/app/auth/types/currentUser.interface';
 import { io } from 'socket.io-client';
 import { environment } from 'src/environments/environment';
 import { Socket } from 'socket.io-client/build/esm/socket';
+import { Observable } from 'rxjs';
 
 @Injectable()
 export class SocketService {
@@ -28,4 +29,19 @@ export class SocketService {
         }
         this.socket.emit(eventName, message);
     }
+
+    listen<T>(eventName: string): Observable<T> {
+        const socket = this.socket; //just done to get around a typescript error where the if condition isn't properly accounted for
+        if(!socket) {
+            throw new Error('Socket connection not established');
+        }
+        return new Observable((subscriber) => {
+            socket.on(eventName, (data) => {
+                subscriber.next(data);
+            });
+        });
+    }
+    //ex:
+    //listen<string>('column:createSuccess').subscribe(res)
+    //makes socket events update an observable so that it works well with angular
 }

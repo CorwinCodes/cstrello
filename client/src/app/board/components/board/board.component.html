@@ -8,6 +8,13 @@
         <div class="column" *ngFor="let column of data.columns">
             <div class="column-title">{{column.title}}</div>
         </div>
-        INLINE FORM TO CREATE COLUMN
+        <inline-form
+            class="create-column-form"
+            defaultText="Add list"
+            [hasButton]="true"
+            buttonText="Add list"
+            inputPlaceholder="Add column name"
+            (handleSubmit)="createColumn($event)"
+        ></inline-form>
     </div>
 </div>

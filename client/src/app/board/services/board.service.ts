@@ -25,4 +25,8 @@ export class BoardService {
         this.board$.next(null);
         this.socketService.emit(SocketEventsEnum.boardsLeave, { boardId })
     }
+
+    addColumn(column: ColumnInterface): void {
+        this.columns$.next([...this.columns$.getValue(), column]);
+    }
 }
