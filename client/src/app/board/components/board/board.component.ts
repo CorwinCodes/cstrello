@@ -100,7 +100,7 @@ export class BoardComponent implements OnInit, OnDestroy {
         const initListenersDeleteColumnSuccessSub = this.socketService
         .listen<string>(SocketEventsEnum.columnsDeleteSuccess)
         .subscribe((columnId: string) => {
-            this.boardService.removeColumn(columnId);
+            this.boardService.deleteColumn(columnId);
         });
         this.subscriptions.add(initListenersDeleteColumnSuccessSub);
     }
