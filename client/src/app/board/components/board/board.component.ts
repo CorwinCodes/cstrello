@@ -96,6 +96,13 @@ export class BoardComponent implements OnInit, OnDestroy {
             this.router.navigate(['/boards']);
         });
         this.subscriptions.add(initListenersDeleteBoardSuccessSub); //may need a similar sub on boards component to refresh? not sure...join room for each board in boards early? would allow a changes badge...
+        
+        const initListenersDeleteColumnSuccessSub = this.socketService
+        .listen<string>(SocketEventsEnum.columnsDeleteSuccess)
+        .subscribe((columnId: string) => {
+            this.boardService.removeColumn(columnId);
+        });
+        this.subscriptions.add(initListenersDeleteColumnSuccessSub);
     }
 
     fetchData(): void { //this logic could go in OnInit, but this is cleaner
@@ -143,6 +150,12 @@ export class BoardComponent implements OnInit, OnDestroy {
     deleteBoard(): void {
         if (confirm('Are you sure you want to DELETE this board? It Can\'t be undone.')) {
             this.boardsService.deleteBoard(this.boardId);
+        }
+    }
+
+    deleteColumn(columnId: string): void {
+        if (confirm('Are you sure you want to DELETE this column? It Can\'t be undone.')) {
+            this.columnsService.deleteColumn(this.boardId, columnId);
         }
     }
 

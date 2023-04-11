@@ -12,7 +12,10 @@
     </div>
     <div class="columns">
         <div class="column" *ngFor="let column of data.columns">
-            <div class="column-title">{{column.title}}</div>
+            <div class="column-title">
+                {{column.title}}
+                <div class="delete-board" (click)="deleteColumn(column.id)">Delete</div>
+            </div>
             <div class="task" *ngFor="let task of getTasksByColumn(column.id, data.tasks)">
                 {{ task.title }}
             </div>

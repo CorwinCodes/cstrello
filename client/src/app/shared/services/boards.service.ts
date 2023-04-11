@@ -26,10 +26,10 @@ export class BoardsService {
     }
 
     updateBoard(boardId: string, fields: {title: string}): void {
-        this.socketService.emit(SocketEventsEnum.boardsUpdateStart, { boardId, fields })
+        this.socketService.emit(SocketEventsEnum.boardsUpdateStart, { boardId, fields });
     }
 
     deleteBoard(boardId: string): void {
-        this.socketService.emit(SocketEventsEnum.boardsDeleteStart, { boardId })
+        this.socketService.emit(SocketEventsEnum.boardsDeleteStart, { boardId });
     }
 }

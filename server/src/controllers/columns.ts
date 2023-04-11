@@ -47,3 +47,22 @@ export const createColumn = async (io: Server, socket: Socket, data: {boardId: s
         socket.emit(SocketEventsEnum.columnsCreateFailure, getErrorMessage(err));
     }
 }
+
+export const deleteColumn = async (io: Server, socket: Socket, data: {boardId: string; columnId: string}) => {
+    try {
+        if (!socket.user) {
+            socket.emit(
+                SocketEventsEnum.columnsDeleteFailure,
+                'User not authorized'
+            );
+            return;
+        }
+        await ColumnModel.findByIdAndDelete(data.columnId); //should this trigger deletes for linked columns and tasks? {option ?}, callback?
+        io.to(data.boardId).emit(
+            SocketEventsEnum.columnsDeleteSuccess,
+            data.columnId
+        );
+    } catch (err) {//using a helper function to convert unknown erro messages to strings
+        socket.emit(SocketEventsEnum.columnsDeleteFailure, getErrorMessage(err));
+    }
+}

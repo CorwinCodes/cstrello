@@ -37,6 +37,11 @@ export class BoardService {
         this.columns$.next([...this.columns$.getValue(), column]);
     }
 
+    removeColumn(columnId: string): void {
+        const newColumns = this.columns$.getValue().filter(column => column.id !== columnId)
+        this.columns$.next([...newColumns]);
+    }
+
     addTask(task: TaskInterface): void {
         this.tasks$.next([...this.tasks$.getValue(), task]);
     }
