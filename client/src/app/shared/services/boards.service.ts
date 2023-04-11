@@ -3,10 +3,12 @@ import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
 import { environment } from "src/environments/environment.development";
 import { BoardInterface } from "../types/board.interface";
+import { SocketService } from "./socket.service";
+import { SocketEventsEnum } from "../types/socketEvents.enum";
 
 @Injectable()
 export class BoardsService {
-    constructor(private http: HttpClient) {}
+    constructor(private http: HttpClient, private socketService: SocketService) {}
     getBoards(): Observable<BoardInterface[]> {
         const url = environment.apiUrl + '/boards';
         return this.http.get<BoardInterface[]>(url);
@@ -21,5 +23,13 @@ export class BoardsService {
         const url = environment.apiUrl + '/boards';
         console.log('createBoard title:', title)
         return this.http.post<BoardInterface>(url, { title });
+    }
+
+    updateBoard(boardId: string, fields: {title: string}): void {
+        this.socketService.emit(SocketEventsEnum.boardsUpdateStart, { boardId, fields })
+    }
+
+    deleteBoard(boardId: string): void {
+        this.socketService.emit(SocketEventsEnum.boardsDeleteStart, { boardId })
     }
 }

@@ -85,6 +85,14 @@ io.use(
     socket.on(SocketEventsEnum.tasksCreateStart, (data) => {
         tasksController.createTask(io, socket, data); 
     });
+
+    socket.on(SocketEventsEnum.boardsUpdateStart, (data) => {
+        boardsController.updateBoard(io, socket, data);
+    });
+
+    socket.on(SocketEventsEnum.boardsDeleteStart, (data) => {
+        boardsController.deleteBoard(io, socket, data);
+    });
 });
 //put server inside mongoose connect to prevent trying to do anything wihtout db connection
 mongoose.connect(connectionString).then(() => {

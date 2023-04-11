@@ -1,6 +1,12 @@
 export enum SocketEventsEnum { //don't forget to match to server
     boardsJoin = "boards:join",
     boardsLeave = "boards:leave",
+    boardsUpdateStart = "boards:updateStart",
+    boardsUpdateSuccess = "boards:updateSuccess",
+    boardsUpdateFailure = "boards:updateFailure",
+    boardsDeleteStart = "boards:deleteStart",
+    boardsDeleteSuccess = "boards:deleteSuccess",
+    boardsDeleteFailure = "boards:deleteFailure",
     columnsCreateStart = "colums:createStart",
     columnsCreateSuccess = "colums:createSuccess",
     columnsCreateFailure = "colums:createFailure",

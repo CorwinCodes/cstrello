@@ -2,7 +2,13 @@
 
 <div class="board" *ngIf="data$ | async as data">
     <div class="board-header-container">
-        INLINE FORM BOARD
+        <inline-form
+            class="edit-board-form"
+            [defaultText]="data.board.title"
+            [title]="data.board.title"
+            (handleSubmit)="updateBoardName($event)"
+        ></inline-form>
+        <div class="delete-board" (click)="deleteBoard()">Delete board</div>
     </div>
     <div class="columns">
         <div class="column" *ngFor="let column of data.columns">

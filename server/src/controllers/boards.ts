@@ -3,6 +3,8 @@ import BoardModel from "../models/board";
 import { ExpressRequestInterface } from "../types/expressRequest.interface";
 import { Server } from "socket.io";
 import { Socket } from "../types/socket.interface";
+import { SocketEventsEnum } from "../types/socketEvents.enum";
+import { getErrorMessage } from "../helpers";
 
 export const getBoards = async (
     req: ExpressRequestInterface,
@@ -65,4 +67,45 @@ export const joinBoard = (io: Server, socket: Socket, data: {boardId: string}) =
 export const leaveBoard = (io: Server, socket: Socket, data: {boardId: string}) => {
     console.log('server socket io leave', data.boardId);
     socket.leave(data.boardId);
+}
+
+export const updateBoard = async (io: Server, socket: Socket, data: {boardId: string; fields: {title: string};}) => {
+    try {
+        if (!socket.user) {
+            socket.emit(
+                SocketEventsEnum.boardsUpdateFailure,
+                'User not authorized'
+            );
+            return;
+        }
+        const updatedBoard = await BoardModel.findByIdAndUpdate(
+            data.boardId,
+            data.fields,
+            { new: true }
+        );
+        io.to(data.boardId).emit(
+            SocketEventsEnum.boardsUpdateSuccess,
+            updatedBoard
+        );
+    } catch (err) {//using a helper function to convert unknown erro messages to strings
+        socket.emit(SocketEventsEnum.boardsUpdateFailure, getErrorMessage(err));
+    }
+}
+
+export const deleteBoard = async (io: Server, socket: Socket, data: {boardId: string}) => {
+    try {
+        if (!socket.user) {
+            socket.emit(
+                SocketEventsEnum.boardsDeleteFailure,
+                'User not authorized'
+            );
+            return;
+        }
+        await BoardModel.findByIdAndDelete(data.boardId); //should this trigger deletes for linked columns and tasks? {option ?}, callback?
+        io.to(data.boardId).emit(
+            SocketEventsEnum.boardsDeleteSuccess
+        );
+    } catch (err) {//using a helper function to convert unknown erro messages to strings
+        socket.emit(SocketEventsEnum.boardsDeleteFailure, getErrorMessage(err));
+    }
 }

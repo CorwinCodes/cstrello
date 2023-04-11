@@ -82,6 +82,20 @@ export class BoardComponent implements OnInit, OnDestroy {
             this.boardService.addTask(task);
         });
         this.subscriptions.add(initializeListenersCreateTaskSuccessSub);
+
+        const initListenersUpdateBoardSuccessSub = this.socketService
+        .listen<BoardInterface>(SocketEventsEnum.boardsUpdateSuccess)
+        .subscribe(updatedBoard => {
+            this.boardService.updateBoard(updatedBoard);
+        });
+        this.subscriptions.add(initListenersUpdateBoardSuccessSub);
+
+        const initListenersDeleteBoardSuccessSub = this.socketService
+        .listen<void>(SocketEventsEnum.boardsDeleteSuccess)
+        .subscribe(() => {
+            this.router.navigate(['/boards']);
+        });
+        this.subscriptions.add(initListenersDeleteBoardSuccessSub); //may need a similar sub on boards component to refresh? not sure...join room for each board in boards early? would allow a changes badge...
     }
 
     fetchData(): void { //this logic could go in OnInit, but this is cleaner
@@ -102,7 +116,7 @@ export class BoardComponent implements OnInit, OnDestroy {
     }
 
     getTasksByColumn(columnId: string, tasks: TaskInterface[]): TaskInterface[] { //created this filter to use with *ngFor in template
-        return tasks.filter(task => task.columnId == columnId);
+        return tasks.filter(task => task.columnId === columnId);
     }
 
     createColumn(title: string): void {
@@ -120,6 +134,16 @@ export class BoardComponent implements OnInit, OnDestroy {
             boardId: this.boardId,
         };
         this.tasksService.createTask(taskInput);
+    }
+
+    updateBoardName(newBoardName: string): void {
+        this.boardsService.updateBoard(this.boardId, { title: newBoardName });
+    }
+
+    deleteBoard(): void {
+        if (confirm('Are you sure you want to DELETE this board? It Can\'t be undone.')) {
+            this.boardsService.deleteBoard(this.boardId);
+        }
     }
 
     ngOnDestroy(): void {
