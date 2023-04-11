@@ -9,6 +9,9 @@ import { ColumnInterface } from 'src/app/shared/types/column.interface';
 import { SocketEventsEnum } from 'src/app/shared/types/socketEvents.enum';
 import { BoardService } from '../../services/board.service';
 import { ColumnInputInterface } from 'src/app/shared/types/columnInput.interface';
+import { TasksService } from 'src/app/shared/services/tasks.service';
+import { TaskInterface } from 'src/app/shared/types/task.interface';
+import { TaskInputInterface } from 'src/app/shared/types/taskInput.interace';
 
 @Component({
     selector: 'board',
@@ -19,6 +22,7 @@ export class BoardComponent implements OnInit, OnDestroy {
     data$: Observable<{
         board: BoardInterface;
         columns: ColumnInterface[];
+        tasks: TaskInterface[];
     }>;
     subscriptions = new Subscription;
     constructor(
@@ -28,6 +32,7 @@ export class BoardComponent implements OnInit, OnDestroy {
         private boardService: BoardService,
         private socketService: SocketService,
         private columnsService: ColumnsService,
+        private tasksService: TasksService,
     ) {
         const boardId = this.route.snapshot.paramMap.get('boardId'); //id is grabbed in constructor and subjected to if check to throw error before assignment so that we can be certain board id is initialized as a string
         if (!boardId) {
@@ -38,9 +43,11 @@ export class BoardComponent implements OnInit, OnDestroy {
         this.data$ = combineLatest([
             this.boardService.board$.pipe(filter(Boolean)), //standard way to ensure the stream is filtered of initial null values before informing the observable here
             this.boardService.columns$,
-        ]).pipe(map(([board, columns]) => ({ //destructuring from the combined streams here, order is important
+            this.boardService.tasks$,
+        ]).pipe(map(([board, columns, tasks]) => ({ //destructuring from the combined streams here, order is important
             board,
             columns,
+            tasks,
         })) //now we have mapped the data as an object for the cleaner data$ stream
         );
     }
@@ -68,6 +75,13 @@ export class BoardComponent implements OnInit, OnDestroy {
             this.boardService.addColumn(column);
         });
         this.subscriptions.add(initializeListenersCreateColumnSuccessSub);
+
+        const initializeListenersCreateTaskSuccessSub = this.socketService
+        .listen<TaskInterface>(SocketEventsEnum.tasksCreateSuccess)
+        .subscribe(task => {
+            this.boardService.addTask(task);
+        });
+        this.subscriptions.add(initializeListenersCreateTaskSuccessSub);
     }
 
     fetchData(): void { //this logic could go in OnInit, but this is cleaner
@@ -80,6 +94,15 @@ export class BoardComponent implements OnInit, OnDestroy {
             this.boardService.setColumns(columns); //colums belong to a specific board, so they're save on the board service with other data
         });
         this.subscriptions.add(getColumnsSub);
+
+        const getTasksSub = this.tasksService.getTasks(this.boardId).subscribe(tasks => {
+            this.boardService.setTasks(tasks); //colums belong to a specific board, so they're save on the board service with other data
+        });
+        this.subscriptions.add(getTasksSub);
+    }
+
+    getTasksByColumn(columnId: string, tasks: TaskInterface[]): TaskInterface[] { //created this filter to use with *ngFor in template
+        return tasks.filter(task => task.columnId == columnId);
     }
 
     createColumn(title: string): void {
@@ -88,6 +111,15 @@ export class BoardComponent implements OnInit, OnDestroy {
             boardId: this.boardId,
         };
         this.columnsService.createColumn(columnInput);
+    }
+
+    createTask(title: string, columnId: string): void {
+        const taskInput: TaskInputInterface = {
+            title,
+            columnId,
+            boardId: this.boardId,
+        };
+        this.tasksService.createTask(taskInput);
     }
 
     ngOnDestroy(): void {
