@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, NavigationStart, Router } from '@angular/router';
-import { combineLatest, filter, map, Observable, Subscription } from 'rxjs';
+import { combineLatest, filter, map, Observable, Subject, Subscription, takeUntil } from 'rxjs';
 import { BoardsService } from 'src/app/shared/services/boards.service';
 import { ColumnsService } from 'src/app/shared/services/columns.service';
 import { SocketService } from 'src/app/shared/services/socket.service';
@@ -25,6 +25,7 @@ export class BoardComponent implements OnInit, OnDestroy {
         tasks: TaskInterface[];
     }>;
     subscriptions = new Subscription;
+    unsubscribe$ = new Subject<void>();//note this is a subject so it doesn't have a value initially. using this with pipe take until to condense unsubscribing from listeners
     constructor(
         private boardsService: BoardsService,
         private route: ActivatedRoute,
@@ -61,72 +62,79 @@ export class BoardComponent implements OnInit, OnDestroy {
     }
     
     initializeListeners(): void {
-        const initializeListenersNavSub = this.router.events.subscribe(event => { //added a return for subscription instead of void so we can manage all of them with ng destroy on subscriptions
+        this.router.events
+        .pipe(takeUntil(this.unsubscribe$))
+        .subscribe(event => { //added a return for subscription instead of void so we can manage all of them with ng destroy on subscriptions
             if (event instanceof NavigationStart) {
                 console.log('leaving page');
                 this.boardService.leaveBoard(this.boardId);
             }
         });
-        this.subscriptions.add(initializeListenersNavSub);
 
-        const initializeListenersCreateColumnSuccessSub = this.socketService
+        this.socketService
         .listen<ColumnInterface>(SocketEventsEnum.columnsCreateSuccess)
+        .pipe(takeUntil(this.unsubscribe$))
         .subscribe(column => {
             this.boardService.addColumn(column);
         });
-        this.subscriptions.add(initializeListenersCreateColumnSuccessSub);
 
-        const initializeListenersCreateTaskSuccessSub = this.socketService
+        this.socketService
         .listen<TaskInterface>(SocketEventsEnum.tasksCreateSuccess)
+        .pipe(takeUntil(this.unsubscribe$))
         .subscribe(task => {
             this.boardService.addTask(task);
         });
-        this.subscriptions.add(initializeListenersCreateTaskSuccessSub);
 
-        const initListenersUpdateBoardSuccessSub = this.socketService
+        this.socketService
         .listen<BoardInterface>(SocketEventsEnum.boardsUpdateSuccess)
+        .pipe(takeUntil(this.unsubscribe$))
         .subscribe(updatedBoard => {
             this.boardService.updateBoard(updatedBoard);
         });
-        this.subscriptions.add(initListenersUpdateBoardSuccessSub);
 
-        const initListenersDeleteBoardSuccessSub = this.socketService
+        this.socketService
         .listen<void>(SocketEventsEnum.boardsDeleteSuccess)
+        .pipe(takeUntil(this.unsubscribe$))
         .subscribe(() => {
             this.router.navigate(['/boards']);
         });
-        this.subscriptions.add(initListenersDeleteBoardSuccessSub); //may need a similar sub on boards component to refresh? not sure...join room for each board in boards early? would allow a changes badge...
         
-        const initListenersDeleteColumnSuccessSub = this.socketService
+        this.socketService
         .listen<string>(SocketEventsEnum.columnsDeleteSuccess)
+        .pipe(takeUntil(this.unsubscribe$))
         .subscribe((columnId: string) => {
             this.boardService.deleteColumn(columnId);
         });
-        this.subscriptions.add(initListenersDeleteColumnSuccessSub);
 
-        const initListenersUpdateColumnSuccessSub = this.socketService
+        this.socketService
         .listen<ColumnInterface>(SocketEventsEnum.columnsUpdateSuccess)
+        .pipe(takeUntil(this.unsubscribe$))
         .subscribe(updatedColumn => {
             this.boardService.updateColumn(updatedColumn);
         });
-        this.subscriptions.add(initListenersUpdateColumnSuccessSub);
     }
 
     fetchData(): void { //this logic could go in OnInit, but this is cleaner
-        const getBoardSub = this.boardsService.getBoard(this.boardId).subscribe(board => {
+        this.boardsService
+        .getBoard(this.boardId)
+        .pipe(takeUntil(this.unsubscribe$))
+        .subscribe(board => {
             this.boardService.setBoard(board); //note the S on one of these services
         });
-        this.subscriptions.add(getBoardSub);
         
-        const getColumnsSub = this.columnsService.getColumns(this.boardId).subscribe(columns => {
+        this.columnsService
+        .getColumns(this.boardId)
+        .pipe(takeUntil(this.unsubscribe$))
+        .subscribe(columns => {
             this.boardService.setColumns(columns); //colums belong to a specific board, so they're save on the board service with other data
         });
-        this.subscriptions.add(getColumnsSub);
 
-        const getTasksSub = this.tasksService.getTasks(this.boardId).subscribe(tasks => {
+        this.tasksService
+        .getTasks(this.boardId)
+        .pipe(takeUntil(this.unsubscribe$))
+        .subscribe(tasks => {
             this.boardService.setTasks(tasks); //colums belong to a specific board, so they're save on the board service with other data
         });
-        this.subscriptions.add(getTasksSub);
     }
 
     getTasksByColumn(columnId: string, tasks: TaskInterface[]): TaskInterface[] { //created this filter to use with *ngFor in template
@@ -171,8 +179,7 @@ export class BoardComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
-        if(this.subscriptions){
-            this.subscriptions.unsubscribe();
-        }
+        this.unsubscribe$.next();//emiting this value will unsubscribe all the listeners
+        this.unsubscribe$.complete();//this will end our subscription to the stream itself
     }
 }
