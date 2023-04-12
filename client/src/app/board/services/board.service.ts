@@ -37,6 +37,26 @@ export class BoardService {
         this.columns$.next([...this.columns$.getValue(), column]);
     }
 
+    updateColumn(updatedColumn: ColumnInterface): void {
+        const updatedColumns = this.columns$.getValue().map((column) => {
+            if (column.id === updatedColumn.id) {
+                return { ...column, title: updatedColumn.title } //this maybe needs to be more generalized
+            }
+            return column
+        });
+        this.columns$.next(updatedColumns);
+    }
+
+    /* updateColumn(updatedColumn: ColumnInterface): void {
+        const indexToReplace = this.columns$.getValue().findIndex(column => column.id === updatedColumn.id)
+        if (indexToReplace === -1) {
+            throw new Error('Column not found');
+        }
+        const updatedColumns = this.columns$.getValue()
+        updatedColumns.splice(indexToReplace, 1, updatedColumn);
+        this.columns$.next(updatedColumns);
+    } */
+
     deleteColumn(columnId: string): void {
         const updatedColumns = this.columns$.getValue().filter(column => column.id !== columnId)
         this.columns$.next(updatedColumns);

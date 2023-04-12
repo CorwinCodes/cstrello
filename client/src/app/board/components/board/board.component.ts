@@ -103,6 +103,13 @@ export class BoardComponent implements OnInit, OnDestroy {
             this.boardService.deleteColumn(columnId);
         });
         this.subscriptions.add(initListenersDeleteColumnSuccessSub);
+
+        const initListenersUpdateColumnSuccessSub = this.socketService
+        .listen<ColumnInterface>(SocketEventsEnum.columnsUpdateSuccess)
+        .subscribe(updatedColumn => {
+            this.boardService.updateColumn(updatedColumn);
+        });
+        this.subscriptions.add(initListenersUpdateColumnSuccessSub);
     }
 
     fetchData(): void { //this logic could go in OnInit, but this is cleaner
@@ -132,6 +139,10 @@ export class BoardComponent implements OnInit, OnDestroy {
             boardId: this.boardId,
         };
         this.columnsService.createColumn(columnInput);
+    }
+
+    updateColumnTitle(newTitle: string, columnId: string): void {
+        this.columnsService.updateColumn(columnId, this.boardId, { title: newTitle});
     }
 
     createTask(title: string, columnId: string): void {

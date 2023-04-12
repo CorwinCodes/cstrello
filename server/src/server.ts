@@ -97,6 +97,10 @@ io.use(
     socket.on(SocketEventsEnum.columnsDeleteStart, (data) => {
         columnsController.deleteColumn(io, socket, data);
     });
+
+    socket.on(SocketEventsEnum.columnsUpdateStart, (data) => {
+        columnsController.updateColumn(io, socket, data);
+    });
 });
 //put server inside mongoose connect to prevent trying to do anything wihtout db connection
 mongoose.connect(connectionString).then(() => {
