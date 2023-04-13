@@ -66,6 +66,16 @@ export class BoardService {
         this.tasks$.next([...this.tasks$.getValue(), task]);
     }
 
+    updateTask(updatedTask: TaskInterface): void {
+        const updatedTasks = this.tasks$.getValue().map((task) => {
+            if (task.id === updatedTask.id) {
+                return { ...updatedTask } 
+            }
+            return task
+        });
+        this.tasks$.next(updatedTasks);
+    }
+
     updateBoard(updatedBoard: BoardInterface): void {
         const board = this.board$.getValue();
         if (!board) {

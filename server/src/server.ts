@@ -101,6 +101,10 @@ io.use(
     socket.on(SocketEventsEnum.columnsUpdateStart, (data) => {
         columnsController.updateColumn(io, socket, data);
     });
+
+    socket.on(SocketEventsEnum.tasksUpdateStart, (data) => {
+        tasksController.updateTask(io, socket, data);
+    });
 });
 //put server inside mongoose connect to prevent trying to do anything wihtout db connection
 mongoose.connect(connectionString).then(() => {

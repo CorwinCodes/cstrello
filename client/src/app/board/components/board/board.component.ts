@@ -65,7 +65,7 @@ export class BoardComponent implements OnInit, OnDestroy {
         this.router.events
         .pipe(takeUntil(this.unsubscribe$))
         .subscribe(event => { //added a return for subscription instead of void so we can manage all of them with ng destroy on subscriptions
-            if (event instanceof NavigationStart) {
+            if (event instanceof NavigationStart && !event.url.includes('/boards/')) { //added the and condition so that going to children wouldn't make us leave the board on the socket
                 console.log('leaving page');
                 this.boardService.leaveBoard(this.boardId);
             }
@@ -111,6 +111,13 @@ export class BoardComponent implements OnInit, OnDestroy {
         .pipe(takeUntil(this.unsubscribe$))
         .subscribe(updatedColumn => {
             this.boardService.updateColumn(updatedColumn);
+        });
+
+        this.socketService
+        .listen<TaskInterface>(SocketEventsEnum.tasksUpdateSuccess)
+        .pipe(takeUntil(this.unsubscribe$))
+        .subscribe(updatedTask => {
+            this.boardService.updateTask(updatedTask);
         });
     }
 
@@ -176,6 +183,10 @@ export class BoardComponent implements OnInit, OnDestroy {
         if (confirm('Are you sure you want to DELETE this column? It Can\'t be undone.')) {
             this.columnsService.deleteColumn(this.boardId, columnId);
         }
+    }
+
+    openTask(taskId: string): void {
+        this.router.navigate(['boards', this.boardId, 'tasks', taskId])
     }
 
     ngOnDestroy(): void {

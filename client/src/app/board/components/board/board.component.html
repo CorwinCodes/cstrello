@@ -26,7 +26,11 @@
                     (click)="deleteColumn(column.id)"
                 >
             </div>
-            <div class="task" *ngFor="let task of getTasksByColumn(column.id, data.tasks)">
+            <div 
+                class="task"
+                *ngFor="let task of getTasksByColumn(column.id, data.tasks)"
+                (click)="openTask(task.id)"
+            >
                 {{ task.title }}
             </div>
             <inline-form
@@ -48,3 +52,5 @@
         ></inline-form>
     </div>
 </div>
+
+<router-outlet></router-outlet>

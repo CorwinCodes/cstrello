@@ -48,3 +48,26 @@ export const createTask = async (io: Server, socket: Socket, data: {boardId: str
         socket.emit(SocketEventsEnum.tasksCreateFailure, getErrorMessage(err));
     }
 }
+
+export const updateTask = async (io: Server, socket: Socket, data: {taskId: string; boardId: string; fields: {title?: string; description?: string; columnId?: string};}) => {
+    try {
+        if (!socket.user) {
+            socket.emit(
+                SocketEventsEnum.tasksUpdateFailure,
+                'User not authorized'
+            );
+            return;
+        }
+        const updatedTask = await TaskModel.findByIdAndUpdate(
+            data.taskId,
+            data.fields,
+            { new: true }
+        );
+        io.to(data.boardId).emit(
+            SocketEventsEnum.tasksUpdateSuccess,
+            updatedTask
+        );
+    } catch (err) {
+        socket.emit(SocketEventsEnum.tasksUpdateFailure, getErrorMessage(err));
+    }
+}

@@ -22,4 +22,7 @@ export enum SocketEventsEnum { //don't forget to match to server
     tasksDeleteStart = "tasks:deleteStart",
     tasksDeleteSuccess = "tasks:deleteSuccess",
     tasksDeleteFailure = "tasks:deleteFailure",
+    tasksUpdateStart = "tasks:updateStart",
+    tasksUpdateSuccess = "tasks:updateSuccess",
+    tasksUpdateFailure = "tasks:updateFailure",
 }

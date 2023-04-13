@@ -6,7 +6,7 @@ import { FormBuilder } from "@angular/forms";
     templateUrl: './inlineForm.component.html',
 })
 export class InlineFormComponent {
-    @Input() title: string = '';
+    @Input() title: string  = '';
     @Input() defaultText: string = 'Not defined';
     @Input() hasButton: boolean = false;
     @Input() buttonText: string = 'Submit';
