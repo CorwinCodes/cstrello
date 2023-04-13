@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, NavigationStart, Router } from '@angular/router';
-import { combineLatest, filter, map, Observable, Subject, Subscription, takeUntil } from 'rxjs';
+import { combineLatest, filter, map, Observable, Subject, Subscription, take, takeUntil } from 'rxjs';
 import { BoardsService } from 'src/app/shared/services/boards.service';
 import { ColumnsService } from 'src/app/shared/services/columns.service';
 import { SocketService } from 'src/app/shared/services/socket.service';
@@ -12,6 +12,8 @@ import { ColumnInputInterface } from 'src/app/shared/types/columnInput.interface
 import { TasksService } from 'src/app/shared/services/tasks.service';
 import { TaskInterface } from 'src/app/shared/types/task.interface';
 import { TaskInputInterface } from 'src/app/shared/types/taskInput.interace';
+import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
+
 
 @Component({
     selector: 'board',
@@ -187,6 +189,49 @@ export class BoardComponent implements OnInit, OnDestroy {
 
     openTask(taskId: string): void {
         this.router.navigate(['boards', this.boardId, 'tasks', taskId])
+    }
+
+
+    trackById(index: number, item: { id: string }): string {
+        return item.id;
+    }
+
+    getConnectedListIds(excludeId: string): Observable<string[]> { //those whole thing would be simpler without the combined stream, but oh well
+        return this.data$.pipe(
+          take(1),
+          map((data) => data.columns),
+          map((columns) => columns.map((column) => column.id)),
+          map((columnIds) => columnIds.filter((id) => id !== excludeId))
+        );
+      }
+      
+      
+    onTaskDrop(event: CdkDragDrop<any>) {
+        this.data$.pipe(take(1),map((data) => data.tasks)).subscribe(tasks => {
+            console.log('prevContainer', event.previousContainer.data)
+            console.log('Container', event.container.data)
+            
+            const prevColumnTasks = tasks.filter(task => task.columnId === event.previousContainer.data);
+            const currColumnTasks = tasks.filter(task => task.columnId === event.container.data);
+        
+            if (event.previousContainer === event.container) {
+              moveItemInArray(prevColumnTasks, event.previousIndex, event.currentIndex);
+            } else {
+              transferArrayItem(prevColumnTasks, currColumnTasks, event.previousIndex, event.currentIndex);
+            }
+        
+            // Update the task's column in the backend
+            const taskId = event.item.data;
+            const newColumnId = event.container.data;
+            this.updateTaskColumn(taskId, newColumnId);//????
+        });
+    }
+
+    updateTaskColumn(taskId: string, newColumnId: string) {
+        // Implement the logic to update the task's column in the backend
+        console.log('taskId:', taskId);
+        console.log('newColumnId', newColumnId);
+        this.tasksService.updateTask(this.boardId, taskId, {columnId: newColumnId});
     }
 
     ngOnDestroy(): void {

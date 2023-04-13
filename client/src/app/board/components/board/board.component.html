@@ -11,36 +11,48 @@
         <div class="delete-board" (click)="deleteBoard()">Delete board</div>
     </div>
     <div class="columns">
-        <div class="column" *ngFor="let column of data.columns">
-            <div class="column-title">
-                <inline-form
-                    class="edit-column-form"
-                    [defaultText]="column.title"
-                    [title]="column.title"
-                    (handleSubmit)="updateColumnTitle($event, column.id)"
-                ></inline-form>
-                <img 
-                    src="/assets/close_icon.svg"
-                    alt="delete column icon"
-                    class="column-delete-icon"
-                    (click)="deleteColumn(column.id)"
-                >
-            </div>
+        <div *ngFor="let column of data.columns; trackBy: trackById">
             <div 
-                class="task"
-                *ngFor="let task of getTasksByColumn(column.id, data.tasks)"
-                (click)="openTask(task.id)"
+                class="column"
+                [id]="column.id"
+                cdkDropList
+                [cdkDropListData]="column.id"
+                *ngIf="(getConnectedListIds(column.id) | async) as connectedListIds; else loading"
+                [cdkDropListConnectedTo]="connectedListIds"
+                (cdkDropListDropped)="onTaskDrop($event)"
             >
-                {{ task.title }}
+                <div class="column-title">
+                    <inline-form
+                        class="edit-column-form"
+                        [defaultText]="column.title"
+                        [title]="column.title"
+                        (handleSubmit)="updateColumnTitle($event, column.id)"
+                    ></inline-form>
+                    <img 
+                        src="/assets/close_icon.svg"
+                        alt="delete column icon"
+                        class="column-delete-icon"
+                        (click)="deleteColumn(column.id)"
+                    >
+                </div>
+                <div 
+                    class="task"
+                    *ngFor="let task of getTasksByColumn(column.id, data.tasks); trackBy: trackById"
+                    (click)="openTask(task.id)"
+                    cdkDrag
+                    [cdkDragData]="task.id"
+                >
+                    {{ task.title }}
+                </div>
+                <inline-form
+                    class="create-task-form"
+                    defaultText="Add card"
+                    [hasButton]="true"
+                    buttonText="Add card"
+                    inputPlaceholder="Add card name"
+                    (handleSubmit)="createTask($event, column.id)"
+                ></inline-form>
             </div>
-            <inline-form
-                class="create-task-form"
-                defaultText="Add card"
-                [hasButton]="true"
-                buttonText="Add card"
-                inputPlaceholder="Add card name"
-                (handleSubmit)="createTask($event, column.id)"
-            ></inline-form>
         </div>
         <inline-form
             class="create-column-form"
@@ -54,3 +66,5 @@
 </div>
 
 <router-outlet></router-outlet>
+
+<ng-template #loading>Loading...</ng-template>

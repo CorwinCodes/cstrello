@@ -10,6 +10,7 @@ import { TopBarModule } from '../shared/modules/topBar/topBar.module';
 import { InlineFormModule } from "../shared/modules/inlineForm/inlineForm.module";
 import { TaskModalComponent } from './components/taskModal/taskModal.component';
 import { ReactiveFormsModule } from '@angular/forms';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 
 const routes: Routes = [
     {
@@ -29,6 +30,6 @@ const routes: Routes = [
     declarations: [BoardComponent, TaskModalComponent],
     exports: [],
     providers: [BoardService, ColumnsService, TasksService],
-    imports: [CommonModule, RouterModule.forChild(routes), TopBarModule, InlineFormModule, ReactiveFormsModule]
+    imports: [CommonModule, RouterModule.forChild(routes), TopBarModule, InlineFormModule, ReactiveFormsModule, DragDropModule,]
 })
 export class BoardModule {}
