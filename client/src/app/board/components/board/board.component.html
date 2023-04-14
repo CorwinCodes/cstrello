@@ -43,6 +43,12 @@
                     [cdkDragData]="task.id"
                 >
                     {{ task.title }}
+                    <img 
+                        src="/assets/close_icon.svg"
+                        alt="delete column icon"
+                        class="column-delete-icon"
+                        (click)="deleteTask(task.id); $event.stopPropagation()"
+                    >
                 </div>
                 <inline-form
                     class="create-task-form"

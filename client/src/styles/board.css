@@ -73,6 +73,7 @@
   align-items: center;
   padding: 8px;
   margin-bottom: 8px;
+  justify-content: space-between;
 }
 
 .task:hover {

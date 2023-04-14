@@ -11,7 +11,7 @@ import { TasksService } from 'src/app/shared/services/tasks.service';
     selector: 'task-modal',
     templateUrl: './taskModal.component.html',
 })
-export class TaskModalComponent implements OnInit, OnDestroy{
+export class TaskModalComponent implements OnDestroy{
     @HostBinding('class') classes = 'task-modal';
 
     boardId: string;
@@ -56,13 +56,13 @@ export class TaskModalComponent implements OnInit, OnDestroy{
         this.task$
         .pipe(takeUntil(this.unsubscribe$))
         .subscribe((task) => {
-            this.columnForm.patchValue({ columnId: task.columnId}) //this is why the value is certainly notrr null in the below columnForm.get call
+            this.columnForm.patchValue({ columnId: task.columnId}) //this is why the value is certainly not null in the below columnForm.get call
         });
 
         combineLatest([
             this.task$,
             this.columnForm.get<string>('columnId')!.valueChanges, //without the <string> and assert ! on ('columnId') typescript won't accept this because it's possibly null, but it's certain to have a value
-        ]) //using combine latest because we need to exclude reacting to non-changes rearding the existing task column assignment
+        ]) //using combine latest because we need to exclude reacting to non-changes regarding the existing task column assignment
         .pipe(takeUntil(this.unsubscribe$))
         .subscribe(([task, columnId]) => {
             if (task.columnId !== columnId) {
@@ -71,7 +71,6 @@ export class TaskModalComponent implements OnInit, OnDestroy{
         })
     }
 
-    ngOnInit(): void { }
     goToBoard() {
         this.router.navigate(['boards', this.boardId]);
     }
@@ -82,6 +81,11 @@ export class TaskModalComponent implements OnInit, OnDestroy{
     updateTaskDescription(newTaskDescription: string): void {
         console.log('updateTaskDescription', newTaskDescription)
         this.tasksService.updateTask(this.boardId, this.taskId, {description: newTaskDescription});
+    }
+
+    deleteTask(): void {
+        this.tasksService.deleteTask(this.boardId, this.taskId);
+        this.goToBoard();
     }
 
     ngOnDestroy(): void {

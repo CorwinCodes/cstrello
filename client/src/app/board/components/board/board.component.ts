@@ -121,6 +121,13 @@ export class BoardComponent implements OnInit, OnDestroy {
         .subscribe(updatedTask => {
             this.boardService.updateTask(updatedTask);
         });
+
+        this.socketService
+        .listen<string>(SocketEventsEnum.tasksDeleteSuccess)
+        .pipe(takeUntil(this.unsubscribe$))
+        .subscribe((taskId: string) => {
+            this.boardService.deleteTask(taskId);
+        });
     }
 
     fetchData(): void { //this logic could go in OnInit, but this is cleaner
@@ -176,14 +183,20 @@ export class BoardComponent implements OnInit, OnDestroy {
     }
 
     deleteBoard(): void {
-        if (confirm('Are you sure you want to DELETE this board? It Can\'t be undone.')) {
+        if (confirm('Are you sure you want to DELETE this board and all its columns and tasks? It Can\'t be undone.')) {
             this.boardsService.deleteBoard(this.boardId);
         }
     }
 
     deleteColumn(columnId: string): void {
-        if (confirm('Are you sure you want to DELETE this column? It Can\'t be undone.')) {
+        if (confirm('Are you sure you want to DELETE this column and all its tasks? It Can\'t be undone.')) {
             this.columnsService.deleteColumn(this.boardId, columnId);
+        }
+    }
+
+    deleteTask(taskId: string): void {
+        if (confirm('Are you sure you want to DELETE this task? It Can\'t be undone.')) {
+            this.tasksService.deleteTask(this.boardId, taskId);
         }
     }
 

@@ -47,16 +47,6 @@ export class BoardService {
         this.columns$.next(updatedColumns);
     }
 
-    /* updateColumn(updatedColumn: ColumnInterface): void {
-        const indexToReplace = this.columns$.getValue().findIndex(column => column.id === updatedColumn.id)
-        if (indexToReplace === -1) {
-            throw new Error('Column not found');
-        }
-        const updatedColumns = this.columns$.getValue()
-        updatedColumns.splice(indexToReplace, 1, updatedColumn);
-        this.columns$.next(updatedColumns);
-    } */
-
     deleteColumn(columnId: string): void {
         const updatedColumns = this.columns$.getValue().filter(column => column.id !== columnId)
         this.columns$.next(updatedColumns);
@@ -73,6 +63,11 @@ export class BoardService {
             }
             return task
         });
+        this.tasks$.next(updatedTasks);
+    }
+
+    deleteTask(taskId: string): void {
+        const updatedTasks = this.tasks$.getValue().filter(task => task.id !== taskId);
         this.tasks$.next(updatedTasks);
     }
 
