@@ -22,6 +22,10 @@ const taskSchema = new Schema<TaskDocument>({
         type: Schema.Types.ObjectId,
         required: true,
     },
+    order: {
+        type: Number,
+        required: true,
+    },
 },
 {timestamps: true}
 );

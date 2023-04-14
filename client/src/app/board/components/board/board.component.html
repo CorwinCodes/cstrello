@@ -37,7 +37,7 @@
                 </div>
                 <div 
                     class="task"
-                    *ngFor="let task of getTasksByColumn(column.id, data.tasks); trackBy: trackById"
+                    *ngFor="let task of getTasksByColumn(column.id); index as i; trackBy: trackById"
                     (click)="openTask(task.id)"
                     cdkDrag
                     [cdkDragData]="task.id"

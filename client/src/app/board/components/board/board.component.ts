@@ -146,8 +146,8 @@ export class BoardComponent implements OnInit, OnDestroy {
         });
     }
 
-    getTasksByColumn(columnId: string, tasks: TaskInterface[]): TaskInterface[] { //created this filter to use with *ngFor in template
-        return tasks.filter(task => task.columnId === columnId);
+    getTasksByColumn(columnId: string): TaskInterface[] { //created this filter to use with *ngFor in template
+        return this.boardService.tasks$.getValue().filter(task => task.columnId === columnId).sort((a, b) => a.order - b.order); //sort the tasks by order
     }
 
     createColumn(title: string): void {
@@ -207,31 +207,66 @@ export class BoardComponent implements OnInit, OnDestroy {
       
       
     onTaskDrop(event: CdkDragDrop<any>) {
-        this.data$.pipe(take(1),map((data) => data.tasks)).subscribe(tasks => {
-            console.log('prevContainer', event.previousContainer.data)
-            console.log('Container', event.container.data)
-            
-            const prevColumnTasks = tasks.filter(task => task.columnId === event.previousContainer.data);
-            const currColumnTasks = tasks.filter(task => task.columnId === event.container.data);
-        
-            if (event.previousContainer === event.container) {
-              moveItemInArray(prevColumnTasks, event.previousIndex, event.currentIndex);
-            } else {
-              transferArrayItem(prevColumnTasks, currColumnTasks, event.previousIndex, event.currentIndex);
-            }
-        
-            // Update the task's column in the backend
-            const taskId = event.item.data;
-            const newColumnId = event.container.data;
-            this.updateTaskColumn(taskId, newColumnId);//????
+        const targetColumnId = event.container.id;
+        const sourceColumnId = event.previousContainer.id;
+        console.log('targetColumnId', targetColumnId);
+        console.log('sourceColumnId', sourceColumnId);
+        const targetColumnTasks = this.getTasksByColumn(targetColumnId);
+        const sourceColumnTasks = this.getTasksByColumn(sourceColumnId);
+
+        if (event.previousContainer === event.container) {
+            // The task is moved within the same column
+            moveItemInArray(targetColumnTasks, event.previousIndex, event.currentIndex);
+        } else {
+            // The task is moved to a different column
+            transferArrayItem(
+              sourceColumnTasks,
+              targetColumnTasks,
+              event.previousIndex,
+              event.currentIndex
+            );
+
+            // Update columnId of the moved task on backend
+            const movedTask = targetColumnTasks[event.currentIndex];
+            movedTask.columnId = targetColumnId;
+            this.updateTaskColumn(movedTask.id, movedTask.columnId);
+        }
+
+        // Update the order of tasks in the target column
+        targetColumnTasks.forEach((task, index) => {
+            if (task.order !== index) {
+            task.order = index;
+            this.updateTaskOrder(task.id, task.order);
+                }
         });
+
+        // If the task was moved to a different column, update the order of tasks in the source column as well
+        if (event.previousContainer !== event.container) {
+            sourceColumnTasks.forEach((task, index) => {
+                if (task.order !== index) {
+                    task.order = index;
+                    this.updateTaskOrder(task.id, task.order);
+                }
+            });
+        }
     }
 
     updateTaskColumn(taskId: string, newColumnId: string) {
         // Implement the logic to update the task's column in the backend
+        console.log('-----------------------')
         console.log('taskId:', taskId);
         console.log('newColumnId', newColumnId);
+        console.log('-----------------------')
         this.tasksService.updateTask(this.boardId, taskId, {columnId: newColumnId});
+    }
+
+    updateTaskOrder(taskId: string, newOrder: number) {
+        // Implement the logic to update the task's order in the backend
+        console.log('-----------------------')
+        console.log('taskId:', taskId);
+        console.log('newOrder', newOrder);
+        console.log('-----------------------')
+        this.tasksService.updateTask(this.boardId, taskId, {order: newOrder});
     }
 
     ngOnDestroy(): void {

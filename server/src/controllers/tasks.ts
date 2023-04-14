@@ -5,6 +5,7 @@ import { Server } from "socket.io";
 import { Socket } from "../types/socket.interface";
 import { SocketEventsEnum } from "../types/socketEvents.enum";
 import { getErrorMessage } from "../helpers";
+import { SortOrder } from 'mongoose';
 
 export const getTasks = async (
     req: ExpressRequestInterface,
@@ -15,7 +16,15 @@ export const getTasks = async (
         if(!(req.user)) {
             return res.sendStatus(401);
         }
-        const tasks = await TaskModel.find({ boardId: req.params.boardId }); //We're grabbing every task for the board, and we'll render it by column client side
+        //handle some sort params
+        const sort: { [key: string]: SortOrder } = {};
+        if (req.query.sort) {
+            (req.query.sort as string).split(',').forEach((field: string) => {
+                sort[field] = 'asc';//this sets ascending vs descending order
+            });
+        }
+
+        const tasks = await TaskModel.find({ boardId: req.params.boardId }).sort(sort); //We're grabbing every task for the board, and we'll render it by column client side
         console.log('tasks',tasks);
         res.send(tasks);
     } catch (err) {

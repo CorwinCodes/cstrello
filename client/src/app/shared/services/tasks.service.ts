@@ -13,14 +13,14 @@ export class TasksService {
 
     getTasks(boardId: string): Observable<TaskInterface[]> {
         const url = `${environment.apiUrl}/boards/${boardId}/tasks`;
-        return this.http.get<TaskInterface[]>(url);
+        return this.http.get<TaskInterface[]>(`${url}?sort=columnId,order`); //back-end is splitting sort commands on comma ",""
     }
 
     createTask(taskInput: TaskInputInterface): void {
         this.socketService.emit(SocketEventsEnum.tasksCreateStart, taskInput);
     }
 
-    updateTask(boardId: string, taskId: string, fields: {title?: string; description?: string; columnId?: string;}): void {
+    updateTask(boardId: string, taskId: string, fields: {title?: string; description?: string; columnId?: string; order?: number;}): void {
         this.socketService.emit(SocketEventsEnum.tasksUpdateStart, {
             boardId,
             taskId,
