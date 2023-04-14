@@ -100,8 +100,8 @@ export const deleteBoard = async (io: Server, socket: Socket, data: {boardId: st
                 'User not authorized'
             );
             return;
-        }
-        await BoardModel.findByIdAndDelete(data.boardId); //should this trigger deletes for linked columns and tasks? {option ?}, callback?
+        }//findByIdAndDelete is a great shortcut for deleting children, but for parents we need deleteOne to trigger the filter and prehooks that can clean up child entities like tasks and columns
+        await BoardModel.deleteOne({_id: data.boardId}); //to get this to delete associated columns and tasks we need it to trigger a pre hook in the model, and to do that it needs to be in this object form to be passed as the appropriate filter, _id or id are interchangeable
         io.to(data.boardId).emit(
             SocketEventsEnum.boardsDeleteSuccess
         );

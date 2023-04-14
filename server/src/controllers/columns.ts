@@ -80,7 +80,7 @@ export const deleteColumn = async (io: Server, socket: Socket, data: {boardId: s
             );
             return;
         }
-        await ColumnModel.findByIdAndDelete(data.columnId); //should this trigger deletes for linked columns and tasks? {option ?}, callback?
+        await ColumnModel.deleteOne({_id: data.columnId});
         io.to(data.boardId).emit(
             SocketEventsEnum.columnsDeleteSuccess,
             data.columnId

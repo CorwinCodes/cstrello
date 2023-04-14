@@ -24,7 +24,7 @@ const taskSchema = new Schema<TaskDocument>({
     },
     order: {
         type: Number,
-        required: true,
+        required: false,
     },
 },
 {timestamps: true}
