@@ -1,9 +1,10 @@
 import { NextFunction, Response } from "express";
 import jwt from "jsonwebtoken";
-import { secret } from "../creds/jwtSecret";
 import UserModel from "../models/user";
 import { ExpressRequestInterface } from "../types/expressRequest.interface";
+import { envs } from '../../config';
 
+const secret = envs.JWT_SECRET;
 export default async (req:ExpressRequestInterface, res:Response, next: NextFunction) => {
     try {
         const authHeader = req.headers.authorization;
