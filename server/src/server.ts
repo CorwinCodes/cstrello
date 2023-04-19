@@ -33,7 +33,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended:true}));
 app.use(cors());
 if(envs.SERVE_FRONTEND === 'true'){
-    app.use('/', express.static('../../client/dist/client'));
+    app.use('/', express.static('./../../../client/dist/client'));
 }
 
 app.post('/api/users', usersController.register);
