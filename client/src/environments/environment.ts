@@ -1,5 +1,5 @@
 export const environment = {
-    production: true,
-    apiUrl: 'https://cstrello.herokuapp.com/api',
-    socketUrl: 'https://cstrello.herokuapp.com/',
+    production: false,
+    apiUrl: 'http://localhost:4001/api',
+    socketUrl: 'http://localhost:4001',
 };
