@@ -6,13 +6,14 @@ import { ColumnInterface } from '../types/column.interface';
 import { ColumnInputInterface } from '../types/columnInput.interface';
 import { SocketService } from '../services/socket.service'
 import { SocketEventsEnum } from '../types/socketEvents.enum';
+import { apiUrl } from '../urls';
 
 @Injectable()
 export class ColumnsService {
     constructor(private http: HttpClient, private socketService: SocketService) {}
 
     getColumns(boardId: string): Observable<ColumnInterface[]> {
-        const url = `${environment.apiUrl}/boards/${boardId}/columns`;
+        const url = `${apiUrl}/boards/${boardId}/columns`;
         return this.http.get<ColumnInterface[]>(url);
     }
 

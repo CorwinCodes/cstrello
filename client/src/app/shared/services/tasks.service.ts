@@ -6,13 +6,14 @@ import { SocketService } from '../services/socket.service'
 import { SocketEventsEnum } from '../types/socketEvents.enum';
 import { TaskInterface } from '../types/task.interface';
 import { TaskInputInterface } from '../types/taskInput.interace';
+import { apiUrl } from '../urls';
 
 @Injectable()
 export class TasksService {
     constructor(private http: HttpClient, private socketService: SocketService) {}
 
     getTasks(boardId: string): Observable<TaskInterface[]> {
-        const url = `${environment.apiUrl}/boards/${boardId}/tasks`;
+        const url = `${apiUrl}/boards/${boardId}/tasks`;
         return this.http.get<TaskInterface[]>(`${url}?sort=columnId,order`); //back-end is splitting sort commands on comma ",""
     }
 

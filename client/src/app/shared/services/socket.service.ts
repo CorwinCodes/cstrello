@@ -4,12 +4,13 @@ import { io } from 'socket.io-client';
 import { environment } from 'src/environments/environment';
 import { Socket } from 'socket.io-client/build/esm/socket';
 import { Observable } from 'rxjs';
+import { socketUrl } from '../urls';
 
 @Injectable()
 export class SocketService {
     socket: Socket | undefined;
     setupSocketConnection(currentUser: CurrentUserInterface): void {
-        this.socket = io(environment.socketUrl, {
+        this.socket = io(socketUrl, {
             auth: {
                 token: currentUser.token,
             },

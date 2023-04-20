@@ -6,6 +6,7 @@ import { environment } from "src/environments/environment";
 import { RegisterRequestInterface } from "../types/registerRequest.interface";
 import { LoginRequestInterface } from "../types/loginRequestInterface";
 import { SocketService } from "src/app/shared/services/socket.service";
+import { apiUrl } from "src/app/shared/urls";
 
 @Injectable()
 export class AuthService {
@@ -18,12 +19,12 @@ export class AuthService {
     constructor(private http: HttpClient, private socketService: SocketService) {}
     
     register(registerRequest: RegisterRequestInterface): Observable<CurrentUserInterface> { //note proper typing of var and output
-        const url = environment.apiUrl + '/users';
+        const url = apiUrl + '/users';
         return this.http.post<CurrentUserInterface>(url, registerRequest);//still need to store token w/ set token method, not typingon post
     }
 
     login(loginRequest: LoginRequestInterface): Observable<CurrentUserInterface> {
-        const url = environment.apiUrl + '/users/login';
+        const url = apiUrl + '/users/login';
         return this.http.post<CurrentUserInterface>(url, loginRequest);
     }
 
@@ -38,7 +39,7 @@ export class AuthService {
     }
 
     getCurrentUser():Observable<CurrentUserInterface> {
-        const url = environment.apiUrl + '/user';
+        const url = apiUrl + '/user';
         return this.http.get<CurrentUserInterface>(url);
     }
 
